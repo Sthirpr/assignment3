@@ -1,0 +1,19 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging into Amazon ECR...
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 783764594790.dkr.ecr.us-east-1.amazonaws.com
+  build:
+    commands:
+      - echo Building Docker image...
+      - docker build -t kumar-app .
+      - docker tag kumar-app:latest 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-app:latest
+  post_build:
+    commands:
+      - echo Pushing image to ECR...
+      - docker push 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-app:latest
+artifacts:
+  files:
+    - '**/*'
