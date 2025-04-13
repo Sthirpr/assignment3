@@ -1,19 +1,31 @@
-version: 0.2
+name: Build and Deploy to AWS ECR
 
-phases:
-  pre_build:
-    commands:
-      - echo Logging into Amazon ECR...
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 783764594790.dkr.ecr.us-east-1.amazonaws.com
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
   build:
-    commands:
-      - echo Building Docker image...
-      - docker build -t kumar-app .
-      - docker tag kumar-app:latest 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-app:latest
-  post_build:
-    commands:
-      - echo Pushing image to ECR...
-      - docker push 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-app:latest
-artifacts:
-  files:
-    - '**/*'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws_region: us-east-1
+
+    - name: Log in to Amazon ECR
+      run: |
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <your_account_id>.dkr.ecr.us-east-1.amazonaws.com
+
+    - name: Build, Tag, and Push Docker image
+      run: |
+        docker build -t kumar-ecs-app .
+        docker tag kumar-ecs-app:latest <your_account_id>.dkr.ecr.us-east-1.amazonaws.com/kumar-ecs-app:latest
+        docker push <your_account_id>.dkr.ecr.us-east-1.amazonaws.com/kumar-ecs-app:latest
