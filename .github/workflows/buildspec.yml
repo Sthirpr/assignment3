@@ -22,10 +22,10 @@ jobs:
 
     - name: Log in to Amazon ECR
       run: |
-        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <your_account_id>.dkr.ecr.us-east-1.amazonaws.com
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 783764594790.dkr.ecr.us-east-1.amazonaws.com
 
     - name: Build, Tag, and Push Docker image
       run: |
         docker build -t kumar-ecs-app .
-        docker tag kumar-ecs-app:latest <your_account_id>.dkr.ecr.us-east-1.amazonaws.com/kumar-ecs-app:latest
-        docker push <your_account_id>.dkr.ecr.us-east-1.amazonaws.com/kumar-ecs-app:latest
+        docker tag kumar-ecs-app:latest 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-ecs-app:latest
+        docker push 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-ecs-app:latest
