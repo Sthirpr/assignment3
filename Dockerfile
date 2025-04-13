@@ -1,9 +1,7 @@
 FROM python:3.9-slim
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py .
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
-EXPOSE 5000
-CMD ["flask", "run"]
+COPY . /app
+RUN pip install --trusted-host pypi.python.org -r requirements.txt
+EXPOSE 80
+ENV NAME World
+CMD ["python", "app.py"]
