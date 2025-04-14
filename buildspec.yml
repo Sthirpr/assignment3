@@ -4,15 +4,13 @@ phases:
   install:
     runtime-versions:
       docker: 18
-      
     commands:
-     
       - echo "Checking if Docker is installed..."
       - docker --version
       - echo "Checking if AWS CLI is installed..."
       - aws --version
       - echo "Logging in to ECR..."
-  
+      # Fixing the login issue by not using $(...)
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 783764594790.dkr.ecr.us-east-1.amazonaws.com
 
   pre_build:
