@@ -1,0 +1,6 @@
+[
+  {
+    "name": "kumar-flask-app",
+    "imageUri": "783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest"
+  }
+]
