@@ -2,29 +2,34 @@ version: 0.2
 
 phases:
   install:
+    runtime-versions:
+      docker: 18
+      
     commands:
-      # Login to AWS ECR (private)
+     
+      - echo "Checking if Docker is installed..."
+      - docker --version
+      - echo "Checking if AWS CLI is installed..."
+      - aws --version
       - echo "Logging in to ECR..."
+  
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 783764594790.dkr.ecr.us-east-1.amazonaws.com
-
 
   pre_build:
     commands:
-      # Build Docker image
       - echo "Building Docker image..."
       - docker build -t kumar-flask-app .
 
   build:
     commands:
-      # Tag Docker image with the private ECR repository
       - echo "Tagging Docker image..."
       - docker tag kumar-flask-app:latest 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest
 
   post_build:
     commands:
-      # Push Docker image to the private ECR repository
       - echo "Pushing Docker image to ECR..."
       - docker push 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest
+      - echo '[{"name":"kumar-flask-app","imageUri":"783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest"}]' > imagedefinitions.json
 
 artifacts:
   files:
