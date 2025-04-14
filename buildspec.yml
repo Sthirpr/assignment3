@@ -1,23 +1,30 @@
 version: 0.2
 
 phases:
+  install:
+    commands:
+      # Login to AWS ECR (private)
+      - echo "Logging in to ECR..."
+      - $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 783764594790.dkr.ecr.us-east-1.amazonaws.com)
+
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws --version
-      - $(aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws)
-      - REPO_URI=public.ecr.aws/l0j9g1i7/kumar-flask-app
-      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      # Build Docker image
+      - echo "Building Docker image..."
+      - docker build -t kumar-flask-app .
+
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the Docker image...
-      - docker build -t $REPO_URI:$IMAGE_TAG .
+      # Tag Docker image with the private ECR repository
+      - echo "Tagging Docker image..."
+      - docker tag kumar-flask-app:latest 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest
+
   post_build:
     commands:
-      - echo Build completed on `date`
-      - docker push $REPO_URI:$IMAGE_TAG
-      - echo Writing image definitions...
-      - printf '[{"name":"kumar-container","imageUri":"%s"}]' $REPO_URI:$IMAGE_TAG > imagedefinitions.json
+      # Push Docker image to the private ECR repository
+      - echo "Pushing Docker image to ECR..."
+      - docker push 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest
+
 artifacts:
-  files: imagedefinitions.json
+  files:
+    - imagedefinitions.json
