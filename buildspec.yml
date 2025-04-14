@@ -1,34 +1,23 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      docker: 18
-    commands:
-      - echo "Checking if Docker is installed..."
-      - docker --version
-      - echo "Checking if AWS CLI is installed..."
-      - aws --version
-      - echo "Logging in to ECR..."
-      # Fixing the login issue by not using $(...)
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 783764594790.dkr.ecr.us-east-1.amazonaws.com
-
   pre_build:
     commands:
-      - echo "Building Docker image..."
-      - docker build -t kumar-flask-app .
-
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 783764594790.dkr.ecr.us-east-1.amazonaws.com)
   build:
     commands:
-      - echo "Tagging Docker image..."
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t kumar-flask-app .
       - docker tag kumar-flask-app:latest 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest
-
   post_build:
     commands:
-      - echo "Pushing Docker image to ECR..."
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
       - docker push 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest
-      - echo '[{"name":"kumar-flask-app","imageUri":"783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest"}]' > imagedefinitions.json
 
 artifacts:
   files:
-    - imagedefinitions.json
+    - '**/*'
