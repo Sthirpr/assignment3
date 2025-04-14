@@ -1,23 +1,38 @@
 version: 0.2
 
+env:
+  variables:
+    AWS_ACCESS_KEY_ID: <your-aws-access-key-id>  # Replace with GitHub secret keys
+    AWS_SECRET_ACCESS_KEY: <your-aws-secret-access-key>  # Replace with GitHub secret keys
+    AWS_REGION: us-east-1
+
 phases:
+  install:
+    commands:
+      - echo "Checking if Docker is installed..."
+      - docker --version
+      - echo "Checking if AWS CLI is installed..."
+      - aws --version
+      - echo "Logging in to ECR..."
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 783764594790.dkr.ecr.us-east-1.amazonaws.com
+
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws --version
-      - $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 783764594790.dkr.ecr.us-east-1.amazonaws.com)
+      - echo "Building Docker image..."
+      - docker build -t kumar-flask-app .
+
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the Docker image...
-      - docker build -t kumar-flask-app .
+      - echo "Tagging Docker image..."
       - docker tag kumar-flask-app:latest 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest
+
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker image...
+      - echo "Pushing Docker image to ECR..."
       - docker push 783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest
+      - echo "Writing image definition..."
+      - echo '[{"name":"kumar-flask-app","imageUri":"783764594790.dkr.ecr.us-east-1.amazonaws.com/kumar-flask-app:latest"}]' > imagedefinitions.json
 
 artifacts:
   files:
-    - '**/*'
+    - imagedefinitions.json
